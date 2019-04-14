@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class GraphQLController {
 
 
-    @RequestMapping("/greeting")
-    public String greeting(@RequestParam(value="name", defaultValue="World") String name) {
-        return "Hello world " + name;
+    @RequestMapping("/graphql")
+    public Object graphql(@RequestParam(value="name", defaultValue="World") String name) {
+        return null;
     }
 
 }

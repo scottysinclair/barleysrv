@@ -19,6 +19,7 @@ bootJar {
 }
 
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 
@@ -27,5 +28,12 @@ targetCompatibility = 1.8
 
 dependencies {
     compile("org.springframework.boot:spring-boot-starter-web")
+    compile("org.springframework:spring-jdbc")
+    compile("org.postgresql:postgresql:42.0.0")
+    compile("scott:scott.barleydb:1.0.0-SNAPSHOT")
     testCompile('org.springframework.boot:spring-boot-starter-test')
+}
+
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
 }
