@@ -27,6 +27,10 @@ public class Environments {
     return envs.get(name);
   }
 
+  public Environment getFirst() {
+    return envs.values().iterator().next();
+  }
+
   public SpecRegistry getSpecRegistry(String environmentName) {
     return envDefs.get(environmentName).getFullSpecRegistry();
   }

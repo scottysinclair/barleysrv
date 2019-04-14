@@ -15,6 +15,11 @@ import scott.barleydb.api.graphql.BarleyGraphQLSchema;
 import scott.barleydb.api.graphql.GraphQLContext;
 import scott.barleydb.api.graphql.GraphQLExecutionException;
 
+/**
+ * GraphQL endpoints
+ * @author scott
+ *
+ */
 @RestController
 public class GraphQLController {
 
@@ -49,7 +54,6 @@ public class GraphQLController {
         return x.getErrors();
     }
   }
-
 
 
   private synchronized BarleyGraphQLSchema getOrCreate(String environmentName, String namespace) {
