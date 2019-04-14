@@ -20,14 +20,30 @@ import scott.barleydb.build.specgen.fromdb.FromDatabaseSchemaToSpecification;
 @Component
 public class Environments {
 
+  private Map<String, EnvironmentDef> envDefs = new HashMap<>();
   private Map<String, Environment> envs = new HashMap<>();
 
-  public void addFromDatabase(Properties properties) throws Exception {
+  public Environment getEnvironment(String name) {
+    return envs.get(name);
+  }
+
+  public SpecRegistry getSpecRegistry(String environmentName) {
+    return envDefs.get(environmentName).getFullSpecRegistry();
+  }
+
+
+  public SpecRegistry addFromDatabase(Properties properties) throws Exception {
     DataSource ds = toDataSource(properties);
     SpecRegistry spec = toSpecification(ds, properties);
     cacheOnDisk(spec, properties);
-    Environment env = toEnvironment(ds, spec, properties);
-    envs.put(properties.getProperty("namespace"), env);
+    EnvironmentDef envDef = toEnvironmentDef(ds, spec, properties);
+    String envName = properties.getProperty("env.name");
+    if (envName != null) {
+      Environment env = envDef.create();
+      envDefs.put(envName, envDef);
+      envs.put(envName, env);
+    }
+    return spec;
   }
 
   private DataSource toDataSource(Properties props) {
@@ -56,7 +72,7 @@ public class Environments {
     m.marshal(spec, new File(System.getProperty("java.io.tmpdir") + "/" + props.getProperty("namespace") + "-ns.xml"));
   }
 
-  private Environment toEnvironment(DataSource ds, SpecRegistry specRegistry, Properties props) throws Exception {
+  private EnvironmentDef toEnvironmentDef(DataSource ds, SpecRegistry specRegistry, Properties props) throws Exception {
      EnvironmentDef builder = EnvironmentDef.build();
      builder.withDataSource(ds);
      builder.withNoClasses();
@@ -67,7 +83,7 @@ public class Environments {
      if (props.getProperty("ddl.create") != null) {
        builder.withSchemaCreation(true);
      }
-     return builder.create();
+     return builder;
   }
 
 }
