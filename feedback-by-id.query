@@ -1,0 +1,3 @@
+{
+ "query": "{ feedbackById(id: 1) { id, info } }"
+}

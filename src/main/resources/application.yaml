@@ -1,0 +1,5 @@
+logging:
+  level:
+    scott.barleydb: 
+      server.jdbc.query:
+         QueryExecuter: DEBUG
