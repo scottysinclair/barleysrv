@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -130,10 +131,37 @@ public class CrudService {
             case ENUM: return id; //TODO
             case SQL_DATE: return id; //TODO
             case UTIL_DATE: return id; //TODO
+            case SHORT: return id;
+            case BYTE_ARRAY: return id;
             case UUID: return UUID.fromString(id);
         }
         return id;
     }
+
+    private Object convert(NodeType nodeType, JsonNode jsonNode, boolean convertEmptyStringToNull) {
+      if (jsonNode == null || (jsonNode.asText().isEmpty() && convertEmptyStringToNull)) {
+          return null;
+      }
+      if (nodeType.getRelationInterfaceName() != null && nodeType.getJdbcType() != null) {
+          EntityType refType = nodeType.getEntityType().getDefinitions().getEntityTypeMatchingInterface(nodeType.getRelationInterfaceName(), true);
+          NodeType keyType = refType.getNodeType( refType.getKeyNodeName(), true );
+          return convert(keyType, jsonNode, convertEmptyStringToNull);
+      }
+      switch (nodeType.getJavaType()) {
+          case STRING : return jsonNode.asText();
+          case INTEGER: return jsonNode.asInt();
+          case BOOLEAN: return jsonNode.asBoolean();
+          case LONG: return jsonNode.asLong();
+          case BIGDECIMAL: new BigDecimal( jsonNode.asText() );
+          case ENUM: return Enum.valueOf((Class) nodeType.getEnumType(), jsonNode.asText());//TODO: support ID
+          case SQL_DATE: return new java.sql.Date(System.currentTimeMillis()); //TODO
+          case UTIL_DATE: return new java.util.Date(); //TODO
+          case SHORT: return jsonNode.asInt();
+          case BYTE_ARRAY: return jsonNode.asText();
+          case UUID: return UUID.fromString(jsonNode.asText());
+          default: return jsonNode.asText();
+      }
+  }
 
     @GetMapping(path = "/barleyrs/entities/{namespace}/{entityType}", produces = MediaType.APPLICATION_JSON_VALUE)
     public QueryResult<Object> listEntities(
@@ -199,8 +227,7 @@ public class CrudService {
     public List<Entity> persist(
              @PathVariable("namespace") String namespace,
              @PathVariable("entityType") String entityTypeName,
-             @PathVariable("id") String id,
-             ObjectNode rootNode) throws BarleyDBException {
+             @RequestBody ObjectNode rootNode) throws BarleyDBException {
 
         Environment env = envs.getFirst();
         EntityContext ctx = new EntityContext(env, namespace);
@@ -213,14 +240,13 @@ public class CrudService {
         return Collections.emptyList();
     }
 
-    @DeleteMapping(path = "/barleyrs/entities/{namespace}/{entityType}/",
+    @DeleteMapping(path = "/barleyrs/entities/{namespace}/{entityType}",
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE)
     public boolean delete(
             @PathVariable("namespace") String namespace,
             @PathVariable("entityType") String entityTypeName,
-            @PathVariable("id") String id,
-            ObjectNode rootNode) throws BarleyDBException {
+            @RequestBody ObjectNode rootNode) throws BarleyDBException {
 
         Environment env = envs.getFirst();
         EntityContext ctx = new EntityContext(env, namespace);
@@ -245,7 +271,7 @@ public class CrudService {
             }
             Node eNode = entity.getChild(fieldName);
             if (eNode instanceof ValueNode) {
-                ((ValueNode)eNode).setValue( convert( eNode.getNodeType(), jsNode.asText(), true));
+                ((ValueNode)eNode).setValue( convert( eNode.getNodeType(), jsNode, true));
             }
             else if (eNode instanceof RefNode) {
                 RefNode refNode = ((RefNode)eNode);
@@ -253,7 +279,7 @@ public class CrudService {
                     /*
                      * we just refer to a key so set it
                      */
-                    final Object key = convert( eNode.getNodeType(), jsNode.asText(), true );
+                    final Object key = convert( eNode.getNodeType(), jsNode, true );
                     Entity e = ctx.getEntity(refNode.getEntityType(), key, false);
                     if (e == null) {
                         e = ctx.newEntity(refNode.getEntityType(), key, refConstraints);

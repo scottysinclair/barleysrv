@@ -1,5 +1,10 @@
 logging:
   level:
-    scott.barleydb: DEBUG 
-#      server.jdbc.query:
-#         QueryExecuter: DEBUG
+    scott.barleydb: 
+      server.jdbc:
+        query:
+          QueryExecuter: DEBUG
+        persist:
+          BatchExecuter: DEBUG
+      api.persist:
+         LoggingAuditor: DEBUG
