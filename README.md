@@ -1,19 +1,19 @@
-#BarleySRV
+# BarleySRV
 
 A SpringBoot server which can be pointed at a database schema and provide:
 1. GraphQL query execution
 2. Posting JSON data into the database
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 
-
-
-
-
-
-
-
-
-
----------------
+- --------------
 http://localhost:8080/sdl/bill1/scott.billable
 http://localhost:8080/entitytypes
 #generic server
