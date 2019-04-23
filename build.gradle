@@ -12,16 +12,22 @@ apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
+apply plugin: 'maven'
+
 
 bootJar {
-    baseName = 'gs-rest-service'
-    version =  '0.1.0'
+    baseName = 'scott.barleysrv'
+    version =  '0.0.1'
 }
 
 repositories {
     mavenLocal()
     mavenCentral()
 }
+
+group='scott'
+version='0.0.1'
+
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
